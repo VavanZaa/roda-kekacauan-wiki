@@ -1,0 +1,11 @@
+{
+  "name": "roda-kekacauan-wiki",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "sync-wiki": "node scripts/sync-wiki.mjs",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/preview.mjs",
+    "test": "node --test tests/*.test.mjs"
+  }
+}

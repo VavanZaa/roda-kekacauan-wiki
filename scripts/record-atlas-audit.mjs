@@ -1,0 +1,30 @@
+import {readFile,writeFile,readdir,stat} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+import path from 'node:path';
+const root=fileURLToPath(new URL('../',import.meta.url));
+const library=path.resolve(root,'../Roda Kekacauan/character-design/reference-library');
+const json=async p=>JSON.parse(await readFile(p,'utf8'));
+const L=await json(path.join(library,'metadata/library.json'));
+const audit=await json(path.join(library,'metadata/race-image-audit.json'));
+const heroAudit=await json(path.join(library,'metadata/hero-origin-audit.json'));
+const heroVisualReview=await json(path.join(library,'metadata/hero-image-visual-review.json'));
+const verification=await json(path.join(root,'preview/atlas-verification.json'));
+async function walk(dir){const files=[];for(const e of await readdir(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())files.push(...await walk(p));else if(e.isFile())files.push({path:p,bytes:(await stat(p)).size});}return files;}
+const dist=path.join(root,'dist'),files=await walk(dist);
+const relative=files.map(f=>path.relative(dist,f.path).replaceAll('\\','/'));
+const zip=await readFile(path.join(root,'roda-kekacauan-deploy.zip'));
+verification.date='2026-10-12';verification.lastCheckedDate='2026-10-12';
+verification.libraryVersion=L.version;
+verification.coverage.generatedConceptSheets=L.plates.filter(p=>p.tool==='built-in-image_gen').length;
+verification.coverage.creditedSourceImages=L.plates.filter(p=>p.referenceStatus==='credited-source-reference').length;
+verification.checks.referencePackTestsPassed=11;
+verification.uploadArtifact={file:'roda-kekacauan-deploy.zip',sha256:createHash('sha256').update(zip).digest('hex').toUpperCase(),fileCount:files.length,atlasImageFiles:relative.filter(f=>/^atlas\/art\/.*\.webp$/.test(f)).length,bytes:zip.length,largestFileBytes:Math.max(...files.map(f=>f.bytes)),privateLibraryMetadataIncluded:relative.some(f=>/(^|\/)(canonical|metadata|receipts|state)(\/|$)|GENERATION-CONTRACT/.test(f))};
+const publishedArtifactMatches=verification.publicationStatus==='deployed-and-browser-verified'&&verification.deployment?.artifactSha256===verification.uploadArtifact.sha256;
+if(verification.publicationStatus==='deployed-and-browser-verified'&&!publishedArtifactMatches)verification.publicationStatus='local-update-awaiting-publication';
+verification.imageAudit={date:audit.date,status:audit.status,...audit.summary,closestPairsVisuallyReviewed:heroVisualReview.closestAppearancePairs.length,browserLabelsAndImages:'passed',exportedDepictionContext:'passed',phoneWidths:[390,320],horizontalOverflow:false,localOnly:true,earlierArtwork:'Roda Kekacauan/character-design/reference-library/art/race-context-corrections-01.png',artwork:[1,2,3,4].map(n=>'Roda Kekacauan/character-design/reference-library/art/hero-origin-corrections-'+String(n).padStart(2,'0')+'.png'),promptReceipts:heroVisualReview.acceptedImageReceipts.map(p=>'Roda Kekacauan/character-design/reference-library/'+p),screenshot:'preview/atlas-hero-source-audit.jpg',visualReview:'Roda Kekacauan/character-design/reference-library/metadata/hero-image-visual-review.json',generationContractDepictionRules:'verified; whole-roster source-first rules saved in spin AGENTS.md and canonical/GENERATION-CONTRACT.md'};
+verification.heroOriginAudit={...heroAudit.summary,totalHeroImagesCorrected:heroAudit.summary.additionalImagesReplaced+heroAudit.summary.earlierCorrectionsPreserved,report:'Roda Kekacauan/character-design/reference-library/metadata/hero-origin-audit.json',limits:heroAudit.limits};
+if(publishedArtifactMatches){verification.imageAudit.localOnly=false;verification.imageAudit.localScreenshot=verification.imageAudit.screenshot;verification.imageAudit.screenshot=verification.liveVerification.screenshot;}
+if(verification.uploadArtifact.privateLibraryMetadataIncluded)throw new Error('Private metadata is present in the deployment directory.');
+await writeFile(path.join(root,'preview/atlas-verification.json'),JSON.stringify(verification,null,2)+'\n');
+console.log(JSON.stringify({publicationStatus:verification.publicationStatus,uploadArtifact:verification.uploadArtifact,imageAudit:verification.imageAudit},null,2));

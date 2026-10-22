@@ -1,0 +1,61 @@
+{
+  "id": "karakter-001",
+  "snapshotId": "final-snapshot-001",
+  "status": "draft",
+  "episode": 1,
+  "name": "Nama karakter",
+  "title": "",
+  "requestedBy": "",
+  "races": [
+    "Human"
+  ],
+  "archetypes": [],
+  "size": null,
+  "image": null,
+  "backstory": "",
+  "attributes": [],
+  "stats": {
+    "strength": {
+      "raw": 0,
+      "modifiers": [],
+      "final": 0
+    },
+    "speed": {
+      "raw": 0,
+      "modifiers": [],
+      "final": 0
+    },
+    "durability": {
+      "raw": 0,
+      "modifiers": [],
+      "final": 0
+    },
+    "intelligence": {
+      "raw": 0,
+      "modifiers": [],
+      "final": 0
+    },
+    "fight": {
+      "raw": 0,
+      "modifiers": [],
+      "final": 0
+    }
+  },
+  "powerMastery": {
+    "raw": 0,
+    "modifiers": [],
+    "final": 0
+  },
+  "weapons": [],
+  "powers": [],
+  "weaknesses": [],
+  "spins": [],
+  "provenance": {
+    "runId": "run-001",
+    "rulesVersion": "isi-versi-aturan"
+  },
+  "publication": {
+    "tiktokUrl": null,
+    "publishedAt": null
+  }
+}
